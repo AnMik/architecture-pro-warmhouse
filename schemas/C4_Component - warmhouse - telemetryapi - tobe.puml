@@ -1,0 +1,21 @@
+@startuml warmhouse current
+!include Common/C4_Component.puml
+
+title Диаграмма компонента "Апи для агрегации событий" для системы Умный Дом TO BE
+
+Component(telemetry_aggregation_service, "BackgroundService", "go", "Фоновая таска получения и агрегации событий телеметрии.")
+Component(telemetry_controller, "RestController", "go", "Контроллер получения телеметрии.")
+Component(rest_integration, "RestIntegration", "go", "Интеграция с апи приложения для запроса данных об устройствах и пользователях.")
+ContainerDb(telemetry_db, "Database", "ClickHouse", "Хранилище агрегационных данных.")
+ContainerQueue_Ext(telemetry_events, "EventStore", "kafka", "Персистентная очередь событий телеметрии.")
+Container_Ext(warmhouse_backend_api, "ApiApplication", "dotnet", "Бэкенд-апи для веб-приложения.")
+Container_Ext(warmhouse_web_app, "WebApplication", "angular", "Управление устройствами, мониторинг и пр.")
+
+Rel(telemetry_controller, warmhouse_web_app, "Данные телеметрии", "JSON/HTTPS")
+Rel(telemetry_db, telemetry_controller, "Данные телеметрии", "TCP")
+Rel(warmhouse_backend_api, rest_integration, "Получений устройств и пользователей", "JSON/HTTPS")
+Rel(rest_integration, telemetry_aggregation_service, "Получений устройств и пользователей", "go")
+Rel(telemetry_events, telemetry_aggregation_service, "Получений событий из очереди", "TCP")
+Rel(telemetry_aggregation_service, telemetry_db, "Сохранение агрегированных данных", "TCP")
+
+@enduml

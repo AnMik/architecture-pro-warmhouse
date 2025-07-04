@@ -1,0 +1,110 @@
+openapi: 3.0.1
+info:
+  title: Device Commands API
+  description: API для отправки команд управления устройствами умного дома
+  version: 1.0.0
+servers:
+  - url: https://api.warmhouse.ru
+    description: Production server
+tags:
+  - name: Commands
+    description: Управление устройствами
+
+paths:
+  /api/v1/devices/{deviceId}/commands:
+    post:
+      tags: [Commands]
+      summary: Отправить команду устройству
+      description: Отправляет команду на изменение состояния устройства (включение, настройка режима и т.д.).
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID устройства
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        '202':
+          description: Команда принята в обработку
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Command accepted"
+                  commandId:
+                    type: string
+                    example: "cmd_12345"
+        '400':
+          description: Неверный формат команды
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid command parameters"
+        '404':
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Device not found"
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+
+components:
+  schemas:
+    DeviceCommand:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [turn_on, turn_off, set_mode, set_power]
+          example: "turn_on"
+          description: Тип действия
+        parameters:
+          type: object
+          properties:
+            mode:
+              type: string
+              example: "cool"
+              description: Режим работы (для кондиционеров)
+            power_level:
+              type: integer
+              minimum: 0
+              maximum: 100
+              example: 75
+              description: Уровень мощности (0-100%)
+            color:
+              type: string
+              example: "#FF5733"
+              description: Цвет (для RGB-устройств)
+          description: Параметры команды
+      example:
+        action: "set_mode"
+        parameters:
+          mode: "cool"
+          power_level: 50

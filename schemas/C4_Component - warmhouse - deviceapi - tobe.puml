@@ -1,0 +1,24 @@
+@startuml warmhouse current
+!include Common/C4_Component.puml
+
+title Диаграмма компонента "Апи для взаимодействия с устройствами" для системы Умный Дом TO BE
+
+Component(telemetry_service, "BackgroundService", "java spring", "Фоновая таска получения событий телеметрии.")
+Component(device_commands_service, "BackgroundService", "java spring", "Фоновая таска получения команд для управления устройствами.")
+Component(event_manager, "Manager", "java", "Менеджер для работы с событиями.")
+Component(command_manager, "Manager", "java", "Менеджер для работы с командами.")
+Container_Ext(device_driver, "Driver", "zigbee", "Драйвер управления устройством.")
+ContainerQueue(telemetry_events, "MessageQueue", "kafka", "Персистентная очередь событий телеметрии.")
+System_Ext(device, "Устройство", "Устройство умного дома.")
+ContainerQueue_Ext(device_commands, "MessageQueue", "kafka", "Персистентная очередь команд для устройств.")
+
+Rel(device, device_driver, "Получение данных с устройства", "zigbee")
+Rel(device_driver, event_manager, "Маппинг событий в формат приложения", "java")
+Rel(event_manager, telemetry_service, "Отправка событий в хранилище", "java")
+Rel(telemetry_service, telemetry_events, "Отправка событий в хранилище", "TCP")
+Rel(device_commands, device_commands_service, "Получение управляющих команд", "java")
+Rel(device_commands_service, command_manager, "Получение управляющих команд", "java")
+Rel(command_manager, device_driver, "Вызов команд устройства", "java")
+BiRel(device_driver, device, "Передача команд на устройство", "zigbee")
+
+@enduml

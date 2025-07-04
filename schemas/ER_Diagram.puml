@@ -1,0 +1,75 @@
+@startuml d
+
+entity "User" {
+  * id : NUMBER
+  --
+  email : VARCHAR
+  phone : VARCHAR
+  password_hash : VARCHAR
+  first_name : VARCHAR
+  last_name : VARCHAR
+  created_at : DATETIME
+}
+
+entity "House" {
+  * id : NUMBER
+  --
+  user_id : NUMBER
+	name : VARCHAR
+	address : VARCHAR
+	timezone : ZONEINFO
+}
+
+entity "Room" {
+  * id : NUMBER
+  --
+  name : VARCHAR
+	room_type : VARCHAR
+  house_id : NUMBER
+}
+
+entity "Device" {
+  * id : NUMBER
+  --
+  name : VARCHAR
+	device_type : VARCHAR
+	serial_number : VARCHAR
+  manufacturer : VARCHAR
+	room_id : NUMBER
+}
+
+entity "DeviceState" {
+  * id : NUMBER
+  --
+	enabled : BIT
+	power_level : DECIMAL
+	mode : VARCHAR
+  updated_at : DATETIME
+  device_id : NUMBER
+	active_rule_id : NUMBER
+}
+
+entity "Rule" {
+  * id : NUMBER
+  --
+	name : VARCHAR
+  device_id : NUMBER
+}
+
+entity "RuleTrigger" {
+  * id : NUMBER
+  --
+	name : VARCHAR
+	type : VARCHAR
+	conditions : VARCHAR
+	action : VARCHAR
+}
+
+User ||--o{ House
+House ||--o{ Room
+Room ||--o{ Device
+Device ||--|| DeviceState
+DeviceState ||--|| Rule
+Rule }o--o{ RuleTrigger
+  
+@enduml

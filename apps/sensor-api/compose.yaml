@@ -1,0 +1,6 @@
+﻿services:
+  sensor-api:
+    image: sensor-api
+    build:
+      context: .
+      dockerfile: sensor-api/Dockerfile

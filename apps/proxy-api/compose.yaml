@@ -1,0 +1,6 @@
+﻿services:
+  proxy-api:
+    image: proxy-api
+    build:
+      context: .
+      dockerfile: proxy-api/Dockerfile
