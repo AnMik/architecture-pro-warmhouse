@@ -169,20 +169,24 @@
 
 # **Задание 6. Разработка MVP**
 
-Новые микросервисы для работы с датчиками и телементрией:sensor-api, telemetry-api.
+Новые микросервисы для работы с датчиками:
 
 [sensor-api Main](apps/sensor-api/sensor-api/Program.cs)
 
 [sensor-api Dockerfile](apps/sensor-api/sensor-api/Dockerfile)
 
+Сервис отвечает за работу с дачиками (создание, обновление). Также содержит [фоновую задачу](apps/sensor-api/sensor-api/UpdateSensorsValuesBackgroundService.cs) обновления текущих значений датчиков.
+
+И телеметрией:
+
 [telemetry-api Main](apps/telemetry-api/telemetry-api/Program.cs)
 
 [telemetry-api Dockerfile](apps/telemetry-api/telemetry-api/Dockerfile)
 
-Новый сервис распределения вызовов: proxy-api:
+Новый сервис распределения вызовов для постепенного перехода на микросервисы:
 
 [proxy-api Main](apps/telemetry-api/telemetry-api/Program.cs)
 
 [proxy-api Dockerfile](apps/telemetry-api/telemetry-api/Dockerfile)
 
-Микросервис проксирования на основании ([стратегии проксирования](apps/telemetry-api/telemetry-api/MigrationStrategy.cs)) через процент распределяет ([вызовы](apps/telemetry-api/telemetry-api/Handlers.cs)) между монолитом и новыми микросервисами для постепенного переезда на микросервисы.
+Микросервис проксирования на основании ([стратегии проксирования](apps/proxy-api/proxy-api/MigrationStrategy.cs)) распределяет ([вызовы](apps/proxy-api/proxy-api/Handlers.cs)) между монолитом и новыми микросервисами для постепенного переезда на микросервисы.

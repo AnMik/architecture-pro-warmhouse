@@ -1,15 +1,14 @@
 version: '3.8'
 
 services:
+
   postgres:
-    build:
-        context: ./smart_home
     image: postgres:16-alpine
     container_name: smarthome-postgres
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - PGUSER=postgres
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGUSER: "postgres"
     networks:
       - smarthome-network
     volumes:
@@ -17,16 +16,16 @@ services:
       - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "smarthome"]
-      interval: 1s
-      timeout: 1s
+      interval: 3s
+      timeout: 3s
       retries: 5
 
   temperature-api:
-    container_name: temperature-api
-    hostname: temperature-api
     build:
       context: ./smarthome-api
       dockerfile: smarthome-api/Dockerfile
+    container_name: temperature-api
+    hostname: temperature-api
     ports:
       - "8081:8081"
     networks:
@@ -52,55 +51,52 @@ services:
     networks:
       - smarthome-network
 
-  sensor-api:
-    container_name: sensor-api
-    hostname: sensor-api
-    depends_on:
-      app:
-        condition: service_started
-    build:
-      context: ./sensor-api
-      dockerfile: sensor-api/Dockerfile
-    ports:
-      - "8083:8083"
-    networks:
-      - smarthome-network
-
   telemetry-api:
+    build:
+      context: ./telemetry-api
+      dockerfile: telemetry-api/Dockerfile
     container_name: telemetry-api
     hostname: telemetry-api
     depends_on:
       app:
         condition: service_started
-    build:
-      context: ./telemetry-api
-      dockerfile: telemetry-api/Dockerfile
     ports:
       - "8084:8084"
     networks:
       - smarthome-network
 
-  proxy-api:
-    container_name: proxy-api
+  sensor-api:
+    build:
+      context: ./sensor-api
+      dockerfile: sensor-api/Dockerfile
+    container_name: sensor-api
+    hostname: sensor-api
     depends_on:
-      app:
-        condition: service_started
-      sensor-api:
-        condition: service_started
       telemetry-api:
         condition: service_started
+    environment:
+      TELEMETRY_API_URL: "http://telemetry-api:8084"
+    ports:
+      - "8083:8083"
+    networks:
+      - smarthome-network
+
+  proxy-api:
     build:
       context: ./proxy-api
       dockerfile: proxy-api/Dockerfile
+    container_name: proxy-api
+    depends_on:
+      sensor-api:
+        condition: service_started
+    environment:
+      LEGACY_API_URL: "http://smarthome-app:8082"
+      SENSOR_API_URL: "http://sensor-api:8083"
+      TELEMETRY_API_URL: "http://telemetry-api:8084"
     ports:
       - "8080:8080"
     networks:
       - smarthome-network
-    environment:
-      REDIRECT_PERCENT: "50"
-      TEMPERATURE_API_URL: "http://smarthome-app:8082"
-      SENSOR_API_URL: "http://sensor-api:8083"
-      TELEMETRY_API_URL: "http://telemetry-api:8084"
 
 volumes:
   postgres_data:

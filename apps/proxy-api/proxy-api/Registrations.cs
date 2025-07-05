@@ -2,9 +2,9 @@ namespace proxy_api;
 
 internal static class Registrations
 {
-    internal static IServiceCollection RegisterClients(this IServiceCollection servicesCollection)
+    internal static IServiceCollection RegisterHttpClients(this IServiceCollection servicesCollection)
     {
-        var legacyApiUrl = Environment.GetEnvironmentVariable("TEMPERATURE_API_URL");
+        var legacyApiUrl = Environment.GetEnvironmentVariable("LEGACY_API_URL");
         var sensorApiUrl = Environment.GetEnvironmentVariable("SENSOR_API_URL");
         var telemetryApiUrl = Environment.GetEnvironmentVariable("TELEMETRY_API_URL");
 

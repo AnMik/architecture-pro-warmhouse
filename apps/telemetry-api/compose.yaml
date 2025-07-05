@@ -1,6 +1,0 @@
-﻿services:
-  telemetry-api:
-    image: telemetry-api
-    build:
-      context: .
-      dockerfile: telemetry-api/Dockerfile
