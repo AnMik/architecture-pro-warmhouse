@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "telemetry-api", "telemetry-api\telemetry-api.csproj", "{1785DAC7-543D-4E21-AC2B-52930FCDACCE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{679E27B0-1A14-4018-A9F7-D9CB2423FE72}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1785DAC7-543D-4E21-AC2B-52930FCDACCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1785DAC7-543D-4E21-AC2B-52930FCDACCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1785DAC7-543D-4E21-AC2B-52930FCDACCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1785DAC7-543D-4E21-AC2B-52930FCDACCE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

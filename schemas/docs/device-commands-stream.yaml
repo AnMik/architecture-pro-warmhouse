@@ -1,0 +1,88 @@
+asyncapi: 3.0.0
+info:
+  title: Warmhouse Device Commands Stream
+  version: 1.0.0
+  description: Канал для отправки команд управления устройствами умного дома
+defaultContentType: application/json
+servers:
+  kafka-server:
+    host: kafka.warmhouse.ru:9092
+    protocol: kafka
+    description: Kafka-брокер для управляющих команд
+channels:
+  device.commands:
+    address: device.commands
+    messages:
+      sendDeviceCommand.message:
+        $ref: '#/components/messages/DeviceCommandMessage'
+    description: Топик для управляющий команд для устройств умного дома
+operations:
+  sendDeviceCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/device.commands'
+    summary: Отправка команды устройству
+    messages:
+      - $ref: '#/channels/device.commands/messages/sendDeviceCommand.message'
+components:
+  messages:
+    DeviceCommandMessage:
+      name: DeviceCommand
+      title: Команда управления устройством
+      summary: Сообщение с командой для устройства
+      payload:
+        type: object
+        required:
+          - deviceId
+          - command
+        properties:
+          deviceId:
+            type: integer
+            description: ID устройства
+            example: 123
+          command:
+            $ref: '#/components/schemas/DeviceCommand'
+          timestamp:
+            type: string
+            format: date-time
+            description: Время отправки команды
+            example: '2024-03-20T15:30:00Z'
+          correlationId:
+            type: string
+            description: ID для отслеживания цепочки команд
+            example: corr_98765
+        example:
+          deviceId: 123
+          command:
+            action: turn_on
+            parameters:
+              power_level: 80
+          timestamp: '2024-03-20T15:30:00Z'
+          correlationId: corr_98765
+  schemas:
+    DeviceCommand:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            - turn_on
+            - turn_off
+            - set_mode
+            - set_power
+            - set_color
+          example: set_mode
+        parameters:
+          type: object
+          properties:
+            mode:
+              type: string
+              example: cool
+            power_level:
+              type: integer
+              example: 75
+            color:
+              type: string
+              example: '#FF5733'

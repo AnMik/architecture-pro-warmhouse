@@ -1,0 +1,15 @@
+@startuml warmhouse current
+!include Common/C4_Context.puml
+
+title Диаграмма контекста для системы Умный Дом AS IS
+
+Person(user, "Пользователь", "Пользователь системы Умный Дом.")
+System(warmhouse_system, "Система Умный Дом", "Система для просмотра и регулировки отопления.")
+System_Ext(device, "Устройство", "Устройство умного дома.")
+
+Rel(user, warmhouse_system, "Использует")
+Rel_Back(user, warmhouse_system, "Данные о температуре")
+Rel(warmhouse_system, device, "Запрос температуры, команда на изменение")
+Rel_Back(warmhouse_system, device, "Данные о температуре")
+
+@enduml

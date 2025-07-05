@@ -1,0 +1,166 @@
+openapi: 3.0.1
+info:
+  title: Warmhouse Telemetry Aggregation API
+  description: API для получения агрегированных данных телеметрии устройств умного дома
+  version: 1.0.0
+servers:
+  - url: https://reports.warmhouse.ru
+    description: Production server
+tags:
+  - name: Reports
+    description: Отчеты по телеметрии
+
+paths:
+  /api/v1/reports/telemetry:
+    get:
+      tags: [Reports]
+      summary: Получить агрегированные данные телеметрии
+      description: Возвращает среднесуточные значения метрик (температура, влажность) для указанного устройства за период.
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID пользователя
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID устройства
+        - name: metricType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [temperature, humidity, power_consumption]
+          description: Тип метрики
+        - name: dateFrom
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-03-01"
+          description: Начальная дата периода (YYYY-MM-DD)
+        - name: dateTo
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-03-31"
+          description: Конечная дата периода (YYYY-MM-DD)
+        - name: aggregation
+          in: query
+          schema:
+            type: string
+            enum: [hourly, daily, weekly]
+            default: daily
+          description: Уровень агрегации данных
+
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deviceId:
+                    type: integer
+                    example: 123
+                  deviceName:
+                    type: string
+                    example: "Датчик температуры в гостиной"
+                  metricType:
+                    type: string
+                    example: "temperature"
+                  unit:
+                    type: string
+                    example: "°C"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                          example: "2024-03-15T00:00:00Z"
+                        value:
+                          type: number
+                          format: float
+                          example: 22.5
+                        min:
+                          type: number
+                          format: float
+                          example: 18.0
+                        max:
+                          type: number
+                          format: float
+                          example: 25.0
+        '400':
+          description: Неверные параметры запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid date range"
+        '404':
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Device not found"
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+
+components:
+  schemas:
+    TelemetryReport:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+        deviceName:
+          type: string
+        metricType:
+          type: string
+        unit:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TelemetryDataPoint'
+    TelemetryDataPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value:
+          type: number
+          format: float
+        min:
+          type: number
+          format: float
+        max:
+          type: number
+          format: float

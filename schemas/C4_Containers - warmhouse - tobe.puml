@@ -1,0 +1,38 @@
+@startuml containers - warmhouse - TO BE
+!include Common/C4_Container.puml
+
+title Диаграмма контейнеров для системы Умный Дом TO BE
+
+Container_Boundary(warmhouse_site_domain, "Домен сайта") {
+
+    Container(api_gateway, "ApiGateway", "node.js", "Балансировщик нагрузки.")
+    Container(warmhouse_web_app, "WebApplication", "angular", "Управление устройствами, мониторинг и пр.")
+    Container(warmhouse_backend_api, "ApiApplication", "dotnet", "Бэкенд-апи для веб-приложения.")
+    Container(telemetry_api, "ApiApplication", "go", "Апи для агрегации и предоставления событий телеметрии")
+    ContainerDb(warmhous_db, "Database", "postgresql", "Основное хранилище приложения.")
+    ContainerDb(telemetry_db, "Database", "ClickHouse", "Хранилище агрегационных данных.")
+    ContainerQueue(device_commands, "MessageQueue", "kafka", "Персистентная очередь команд для устройств.")
+
+    BiRel(warmhouse_web_app, api_gateway, "Запросы/ответы", "HTTPS")
+    BiRel(api_gateway, telemetry_api, "Запросы/ответы", "HTTPS")
+    BiRel(api_gateway, warmhouse_backend_api, "Запросы/ответы", "JSON/HTTPS")
+    BiRel(warmhouse_backend_api, warmhous_db, "Сохранение/загрузка", "TCP/IP")
+    Rel(warmhouse_backend_api, device_commands, "Управляющие команды", "TCP")
+}
+
+Container_Boundary(device_domain, "Домен интеграции с устройствами") {
+
+    Container(device_api, "ApiApplication", "java", "Апи для взаимодействия с устройствами.")
+    ContainerQueue(telemetry_events, "MessageQueue", "kafka", "Персистентная очередь событий телеметрии.")
+    Container_Ext(device, "Device", "zigbee", "Устройство умного дома.")
+
+    Rel(device_commands, device_api, "Управляющие команды", "TCP")
+    Rel(device_api, device, "Управляющие команды", "TCP")
+    Rel(device_api, telemetry_events, "События телеметрии", "TCP")
+    Rel(telemetry_events, telemetry_api, "События телеметрии", "TCP")
+    BiRel(telemetry_api, telemetry_db, "Сохранение/загрузка", "TCP/IP")
+    Rel_Back(device_api, device, "События телеметрии", "TCP")
+    Rel(warmhouse_backend_api, telemetry_api, "Данные об устройствах и пользователях", "JSON/HTTPS")
+}
+
+@enduml

@@ -1,0 +1,52 @@
+@startuml warmhouse current
+!include Common/C4_Component.puml
+
+title Диаграмма компонента "Бэкенд-апи для веб-приложения" для системы Умный Дом TO BE
+
+Component(user_controller, "RestController", "c# MVC", "Контроллер для управления пользователями.")
+Component(device_controller, "RestController", "c# MVC", "Контроллер для управления устройствами.")
+Component(rules_controller, "RestController", "c# MVC", "Контроллер для управления правилами для устройств.")
+Component(telemetry_controller, "RestController", "c# MVC", "Контроллер просмотра данных с устройств.")
+Component(register_user_command_handler, "CommandHandler", "c#", "Регистрация пользователя.")
+Component(register_device_command_handler, "CommandHandler", "c#", "Регистрация устройства.")
+Component(manage_device_command_handler, "CommandHandler", "c#", "Управление зарегистрированными устройствами.")
+Component(configure_rules_command_handler, "CommandHandler", "c#", "Настройка правил для устройств.")
+Component(get_telemetry_query_handler, "QueryHandler", "c#", "Получение телеметрии.")
+Component(user_repository, "Repository", "c# ef core", "Репозиторий для пользователей.")
+Component(device_repository, "Repository", "c# ef core", "Репозиторий для устройств.")
+Component(rules_repository, "Repository", "c# ef core", "Репозиторий для правил.")
+System_Ext(device_api, "ApiApplication", "java", "Апи для взаимодействия с устройствами.")
+ContainerDb(warmhous_db, "Database", "postgresql", "Основное хранилище приложения.")
+ContainerQueue(device_commands, "EventStore", "kafka", "Персистентная очередь команд для устройств.")
+ContainerDb_Ext(telemetry_db, "Database", "ClickHouse", "Хранилище агрегационных данных.")
+Container_Ext(warmhouse_web_app, "WebApplication", "angular", "Управление устройствами, мониторинг и пр.")
+
+Rel(user_controller, register_user_command_handler, "Создание пользователя", "c#")
+Rel(register_user_command_handler, user_repository, "Сохранение пользователя", "c#")
+Rel(user_repository, user_controller, "Загрузка", "TCP/IP")
+BiRel(user_repository, warmhous_db, "Сохранение/загрузка", "TCP/IP")
+
+Rel(device_controller, register_device_command_handler, "Создание устройства", "c#")
+BiRel(register_device_command_handler, device_repository, "Сохранение устройства", "c#")
+Rel(register_device_command_handler, device_commands, "Синхронизация с устройством", "TCP")
+Rel(device_commands, device_api, "Синхронизация с устройством", "JSON/HTTPS")
+Rel(device_controller, manage_device_command_handler, "Изменение устройства", "c#")
+BiRel(manage_device_command_handler, device_repository, "Изменение устройства", "c#")
+Rel(device_repository, device_controller, "Загрузка", "TCP/IP")
+BiRel(device_repository, warmhous_db, "Сохранение/загрузка", "TCP/IP")
+
+Rel(rules_controller, configure_rules_command_handler, "Изменение шаблонов", "c#")
+Rel(rules_repository, rules_controller, "Загрузка", "c#")
+Rel(configure_rules_command_handler, rules_repository, "Сохранение шаблонов", "c#")
+BiRel(rules_repository, warmhous_db, "Сохранение/загрузка", "TCP/IP")
+
+Rel(get_telemetry_query_handler, telemetry_controller, "Получение данных телеметрии", "c#")
+Rel(telemetry_db, get_telemetry_query_handler, "Загрузка", "TCP/IP")
+Rel(device_repository, get_telemetry_query_handler, "Загрузка", "c#")
+
+BiRel(warmhouse_web_app, device_controller, "Управление устройствами", "JSON/HTTPS")
+BiRel(warmhouse_web_app, user_controller, "Управление пользователями", "JSON/HTTPS")
+BiRel(warmhouse_web_app, rules_controller, "Управление правилами", "JSON/HTTPS")
+Rel(telemetry_controller, warmhouse_web_app, "Телеметрия", "JSON/HTTPS")
+
+@enduml
